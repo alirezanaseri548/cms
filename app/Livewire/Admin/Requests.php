@@ -8,6 +8,8 @@ use App\Models\User;
 
 class Requests extends Component
 {
+    public $requests;
+
     // Approve and Assign Role
     public function approve($id)
     {
@@ -15,11 +17,12 @@ class Requests extends Component
         $req->update(['status' => 'approved']);
 
         $user = User::find($req->user_id);
-        if ($user) {
+        if ($user && !$user->hasRole('admin')) {
             $user->assignRole('admin');
         }
 
         session()->flash('msg', '✅ Request approved successfully 💚');
+        $this->loadRequests();
     }
 
     // Reject Request
@@ -29,11 +32,21 @@ class Requests extends Component
         $req->update(['status' => 'rejected']);
 
         session()->flash('msg', '❌ Request rejected.');
+        $this->loadRequests();
+    }
+
+    public function mount()
+    {
+        $this->loadRequests();
+    }
+
+    public function loadRequests()
+    {
+        $this->requests = AdminRequest::with('user')->orderBy('created_at', 'desc')->get();
     }
 
     public function render()
     {
-        $requests = AdminRequest::with('user')->get();
-        return view('livewire.admin.requests', compact('requests'));
+        return view('livewire.admin.requests');
     }
 }
