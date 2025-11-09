@@ -33,5 +33,21 @@ Route::middleware(['auth', 'role:super-admin'])->group(function () {
     Route::get('/admin/requests', Requests::class)->name('admin.requests');
 });
 
+
+// مسیر مخصوص کاربران ساده:
+Route::middleware(['auth', 'role:user'])->group(function () {
+    Route::get('/documents', Documents::class)->name('documents');
+});
+
+// مسیر مخصوص سوپر ادمین:
+Route::middleware(['auth', 'role:super-admin'])->group(function () {
+    Route::get('/admin/requests', Requests::class)->name('admin.requests');
+});
+use App\Livewire\User\Dashboard;
+
+Route::get('/dashboard', Dashboard::class)
+    ->middleware(['auth', 'role:user'])
+    ->name('dashboard');
+
 // 🔐 Authentication Routes
 require __DIR__ . '/auth.php';
