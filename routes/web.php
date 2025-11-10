@@ -4,15 +4,13 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 use App\Livewire\User\Documents;
 use App\Livewire\Admin\Requests;
+use App\Livewire\User\Dashboard;
 
-// 🏠 Homepage
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+Route::get('/', fn() => view('welcome'))->name('home');
 
-// 💼 Dashboard for logged-in users
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
+// 🏠 Dashboard (only for logged-in users with role:user)
+Route::get('/dashboard', Dashboard::class)
+    ->middleware(['auth', 'role:user'])
     ->name('dashboard');
 
 // ⚙️ Settings Routes (Volt Components)
@@ -23,31 +21,15 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
 });
 
-// 👤 User Routes (Livewire)
+// 👤 User Routes
 Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/documents', Documents::class)->name('user.documents');
 });
 
-// 🛠️ Admin Panel Routes (Livewire)
+// 🛠️ Admin Panel Routes
 Route::middleware(['auth', 'role:super-admin'])->group(function () {
     Route::get('/admin/requests', Requests::class)->name('admin.requests');
 });
-
-
-// مسیر مخصوص کاربران ساده:
-Route::middleware(['auth', 'role:user'])->group(function () {
-    Route::get('/documents', Documents::class)->name('documents');
-});
-
-// مسیر مخصوص سوپر ادمین:
-Route::middleware(['auth', 'role:super-admin'])->group(function () {
-    Route::get('/admin/requests', Requests::class)->name('admin.requests');
-});
-use App\Livewire\User\Dashboard;
-
-Route::get('/dashboard', Dashboard::class)
-    ->middleware(['auth', 'role:user'])
-    ->name('dashboard');
 
 // 🔐 Authentication Routes
 require __DIR__ . '/auth.php';
