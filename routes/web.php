@@ -1,35 +1,33 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Livewire\Volt\Volt;
+use App\Http\Controllers\ProfileController;
 use App\Livewire\User\Documents;
 use App\Livewire\Admin\Requests;
-use App\Livewire\User\Dashboard;
 
-Route::get('/', fn() => view('welcome'))->name('home');
-
-// 🏠 Dashboard (only for logged-in users with role:user)
-Route::get('/dashboard', Dashboard::class)
-    ->middleware(['auth', 'role:user'])
-    ->name('dashboard');
-
-// ⚙️ Settings Routes (Volt Components)
-Route::middleware(['auth'])->group(function () {
-    Route::redirect('settings', 'settings/profile');
-    Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
-    Volt::route('settings/password', 'settings.password')->name('settings.password');
-    Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
+Route::get('/', function () {
+    return view('welcome');
 });
 
-// 👤 User Routes
-Route::middleware(['auth', 'role:user'])->group(function () {
-    Route::get('/documents', Documents::class)->name('user.documents');
-});
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
 
-// 🛠️ Admin Panel Routes
-Route::middleware(['auth', 'role:super-admin'])->group(function () {
-    Route::get('/admin/requests', Requests::class)->name('admin.requests');
-});
+    Route::get('/user/documents', Documents::class)
+        ->middleware('role:user')
+        ->name('user.documents');
 
-// 🔐 Authentication Routes
+    Route::get('/admin/requests', Requests::class)
+->middleware('role:admin|super-admin')
+        ->name('admin.requests');
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+Route::get('/super-admin/users', \App\Livewire\SuperAdmin\Users::class)
+    ->middleware('role:super-admin')
+    ->name('super-admin.users');
+
 require __DIR__ . '/auth.php';

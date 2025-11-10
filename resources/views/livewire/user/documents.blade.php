@@ -1,6 +1,10 @@
 <div class="p-6 bg-white rounded shadow-md w-full max-w-lg mx-auto">
     <h2 class="font-bold text-xl mb-4 text-green-600">Role Upgrade Request 💚</h2>
 
+    @if (session()->has('msg'))
+        <p class="mb-3 text-blue-600">{{ session('msg') }}</p>
+    @endif
+
     @if($request)
         @if($request->status === 'pending')
             <p class="text-yellow-600">Your request is pending approval 🌿</p>

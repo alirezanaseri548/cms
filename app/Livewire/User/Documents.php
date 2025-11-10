@@ -12,8 +12,9 @@ class Documents extends Component
     {
         $user = Auth::user();
 
-        // اگر قبلاً درخواست داده، چیزی انجام نده
+        // prevent duplicate requests
         if (AdminRequest::where('user_id', $user->id)->exists()) {
+            session()->flash('msg', '⚠️ You already have a pending or processed request.');
             return;
         }
 
@@ -21,10 +22,13 @@ class Documents extends Component
             'user_id' => $user->id,
             'status' => 'pending',
         ]);
+
+        session()->flash('msg', '💚 Request sent successfully, awaiting admin approval.');
     }
 
     public function render()
     {
+        auth()->shouldUse('web');
         $user = Auth::user();
         $request = AdminRequest::where('user_id', $user->id)->first();
 
